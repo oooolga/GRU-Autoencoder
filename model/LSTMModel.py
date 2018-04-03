@@ -13,7 +13,6 @@ class LSTMAutoEncoder(nn.Module):
 		self.hidden_size = hidden_size
 		self.num_class = num_class
 		self.num_layers = num_layers
-		self.sequence_len = sequence_len
 		self.batch_size = batch_size
 
 		self.encoder = nn.GRU(self.input_size, self.hidden_size, self.num_layers,
@@ -24,7 +23,7 @@ class LSTMAutoEncoder(nn.Module):
 		self.encoded_h0 = nn.Parameter(torch.zeros(self.num_layers, batch_size, self.hidden_size))
 		self.decoded_h0 = nn.Parameter(torch.zeros(1, batch_size, self.input_size))
 
-		self.idx = [i for i in range(x.size(1)-1, -1, -1)]
+		self.idx = [i for i in range(sequence_len-1, -1, -1)]
 		self.idx = Variable(torch.LongTensor(self.idx))
 		
 		if torch.cuda.is_available():
