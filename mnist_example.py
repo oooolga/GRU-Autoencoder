@@ -5,7 +5,6 @@ import model
 from model.utils import *
 from model.LSTMModel import LSTMAutoEncoder
 import argparse, pdb, os
-import torch
 
 #torch.backends.cudnn.enabled = False
 
@@ -19,11 +18,12 @@ def parse():
 						help='Learning rate')
 	parser.add_argument('-m', '--momentum', default=0.5, type=float, help="Momentum")
 	parser.add_argument('-s', '--seed', default=123, type=int, help='Random seed')
+	parser.add_argument('-h', '--hidden_size', default=16, type=int, help='Hidden embedding size')
 	parser.add_argument('--batch_size', default=128, type=int,
 						help='Mini-batch size for training')
 	parser.add_argument('--test_batch_size', default=1000, type=int,
 						help='Mini-batch size for testing')
-	parser.add_argument('--epochs', default=10, type=int, help='Number of epochs')
+	parser.add_argument('--epochs', default=25, type=int, help='Number of epochs')
 	parser.add_argument('-a', '--alpha', default=0.6, type=float,
 						help='Alpha')
 	parser.add_argument('-g', '--gamma', default=0.3, type=float,
@@ -104,9 +104,14 @@ def eval(model, data_loader, check_mem=False, plot_flat=True, epoch_i=0, mode='t
 			print("added mem: %sM"%(add_mem))
 
 		if plot_flat and batch_idx == 0:
-			visualize = decoded[:16].squeeze().unsqueeze(1).repeat(1,3,1)
-			visualize = visualize.view(16,-1,28,28)
+			visualize = decoded[:num_plot].squeeze().unsqueeze(1).repeat(1,3,1)
+			visualize = visualize.view(num_plot,-1,28,28)
 			visualize_kernel(visualize, im_name='epoch{}_{}.jpg'.format(epoch_i, mode),
+							 model_name=model_name, rescale=True, result_path=result_path)
+
+			visualize = data[:num_plot].squeeze().unsqueeze(1).repeat(1,3,1)
+			visualize = visualize.view(num_plot,-1,28,28)
+			visualize_kernel(visualize, im_name='epoch{}_{}_gt.jpg'.format(epoch_i, mode),
 							 model_name=model_name, rescale=True, result_path=result_path)
 
 		del pred, decoded, data, target
@@ -126,8 +131,8 @@ if __name__ == '__main__':
 	if not os.path.exists(args.result_path):
    		os.makedirs(args.result_path)
 
-	global result_path, model_name
-	result_path, model_name = args.result_path, args.model_name
+	global result_path, model_name, num_plot
+	result_path, model_name, num_plot = args.result_path, args.model_name, args.number_plot
 	
 	torch.manual_seed(args.seed)
 	
@@ -140,19 +145,22 @@ if __name__ == '__main__':
 
 	print('Number of training data: {}\n'.format(len(train_loader.dataset)))
 
-	model = LSTMAutoEncoder(input_size=1, hidden_size=16, num_layers=3,
+	model = LSTMAutoEncoder(input_size=1, hidden_size=args.hidden_size, num_layers=3,
 							num_class=10, sequence_len=784, gamma=0.4)
 	
 	if use_cuda:
 		model.cuda()
 
 	optimizer = optim.SGD(model.parameters(), lr=args.learning_rate, momentum=args.momentum)
+	train_loss, valid_loss, train_acc, valid_acc = [],[],[],[]
 
 	print('Epoch {}:'.format(0))
 	avg_loss, accuracy, e_loss, c_loss = eval(model, train_loader)
+	train_loss.append(avg_loss); train_acc.append(accuracy)
 	print('|\t[TRAIN]: loss={:.3f}\t\taccuracy={:.3f}'.format(avg_loss, accuracy))
 	print('|\t[TRAIN]: encoder loss={:.3f}\tclassification loss={:.3f}'.format(e_loss, c_loss))
 	avg_loss, accuracy, e_loss, c_loss = eval(model, valid_loader, mode='valid')
+	valid_loss.append(avg_loss); valid_acc.append(accuracy)
 	print('|\t[VALID]: loss={:.3f}\t\taccuracy={:.3f}'.format(avg_loss, accuracy))
 	print('|\t[VALID]: encoder loss={:.3f}\tclassification loss={:.3f}'.format(e_loss, c_loss))
 
@@ -161,10 +169,30 @@ if __name__ == '__main__':
 		
 		print('Epoch {}:'.format(epoch_i+1))
 		avg_loss, accuracy, e_loss, c_loss = eval(model, train_loader, epoch_i=epoch_i+1)
+		train_loss.append(avg_loss); train_acc.append(accuracy)
 		print('|\t[TRAIN]: loss={:.3f}\t\taccuracy={:.3f}'.format(avg_loss, accuracy))
 		print('|\t[TRAIN]: encoder loss={:.3f}\tclassification loss={:.3f}'.format(e_loss, c_loss))
 		avg_loss, accuracy, e_loss, c_loss = eval(model, valid_loader, epoch_i=epoch_i+1, mode='valid')
+		valid_loss.append(avg_loss); valid_acc.append(accuracy)
 		print('|\t[VALID]: loss={:.3f}\t\taccuracy={:.3f}'.format(avg_loss, accuracy))
 		print('|\t[VALID]: encoder loss={:.3f}\tclassification loss={:.3f}'.format(e_loss, c_loss))
+
+	plt.plot(list(range(0,args.epochs+1,1)), train_loss, 'ro-', label='train loss')
+	plt.plot(list(range(0,args.epochs+1,1)), valid_loss, 'bs-', label='valid loss')
+	plt.title('average loss at each epoch')
+	plt.xlabel('epoch')
+	plt.ylabel('loss')
+	plt.legend(loc=1)
+	plt.savefig(os.path.join(result_path, model_name+'_loss.png'))
+	plt.clf()
+
+	plt.plot(list(range(0,args.epochs+1,1)), train_acc, 'ro-', label='train accuracy')
+	plt.plot(list(range(0,args.epochs+1,1)), valid_acc, 'bs-', label='valid accuracy')
+	plt.title('average classification accuracy at each epoch')
+	plt.xlabel('epoch')
+	plt.ylabel('accuracy')
+	plt.legend(loc=4)
+	plt.savefig(os.path.join(result_path, model_name+'_accuracy.png'))
+	plt.clf()
 
 

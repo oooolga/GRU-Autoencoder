@@ -1,3 +1,6 @@
+__author__	= 	"Olga (Ge Ya) Xu"
+__email__ 	=	"olga.xu823@gmail.com"
+
 import torch
 import torch.nn as nn
 import pdb
