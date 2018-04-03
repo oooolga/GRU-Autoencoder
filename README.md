@@ -18,4 +18,4 @@ python mnist_example.py
 ```
 
 ![encoder_result](mnist_encoder_results.png)
-![train_plot](mnist_encoder_results.png)
+![train_plot](mnist_train_results.png)
