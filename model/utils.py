@@ -80,4 +80,4 @@ def visualize_kernel(kernel_tensor, im_name='conv1_kernel.jpg', pad=1, im_scale=
 																	   grid_Y*Y, -1)
 	kernel_im = scipy.misc.imresize(kernel_im, im_scale, 'nearest')
 	print('|\tSaving {}...'.format(os.path.join(result_path, model_name+'_'+im_name)))
-	scipy.misc.imsave(os.path.join(result_path, model_name+'_'+im_name), kernel_im)
+	plt.imsave(os.path.join(result_path, model_name+'_'+im_name), kernel_im, origin='upper')
