@@ -103,8 +103,8 @@ if __name__ == '__main__':
 
 	print('Number of training data: {}\n'.format(len(train_loader.dataset)))
 
-	model = LSTMAutoEncoder(input_size=1, hidden_size=16, num_layers=3, num_class=10, sequence_len=784,
-							gamma=0.4)
+	model = LSTMAutoEncoder(input_size=1, hidden_size=16, batch_size=args.batch_size, num_layers=3,
+							num_class=10, sequence_len=784, gamma=0.4)
 	
 	if use_cuda:
 		model.cuda()
