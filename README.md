@@ -8,3 +8,9 @@ Reference paer:
 * scipy==1.0.1
 * numpy==1.14.2
 * torch==0.3.0
+
+## Examples
+### MNIST example
+```
+python mnist_example.py
+```

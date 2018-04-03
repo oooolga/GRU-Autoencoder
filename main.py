@@ -171,8 +171,8 @@ if __name__ == '__main__':
 		print('|\t[VALID]: loss={:.3f}\t\taccuracy={:.3f}'.format(avg_loss, accuracy))
 		print('|\t[VALID]: encoder loss={:.3f}\tclassification loss={:.3f}'.format(e_loss, c_loss))
 
-	plt.plot(list(range(0,epoch_i+1,1)), train_loss, 'ro-', label='train loss')
-	plt.plot(list(range(0,epoch_i+1,1)), valid_loss, 'bs-', label='valid loss')
+	plt.plot(list(range(0,args.epochs+1,1)), train_loss, 'ro-', label='train loss')
+	plt.plot(list(range(0,args.epochs+1,1)), valid_loss, 'bs-', label='valid loss')
 	plt.title('average loss at each epoch')
 	plt.xlabel('epoch')
 	plt.ylabel('loss')
@@ -182,7 +182,7 @@ if __name__ == '__main__':
 
 	plt.plot(list(range(0,args.epochs+1,1)), train_acc, 'ro-', label='train accuracy')
 	plt.plot(list(range(0,args.epochs+1,1)), valid_acc, 'bs-', label='valid accuracy')
-	plt.title('average accuracy at each epoch')
+	plt.title('average classification accuracy at each epoch')
 	plt.xlabel('epoch')
 	plt.ylabel('accuracy')
 	plt.legend(loc=4)
