@@ -61,7 +61,7 @@ def train(model, optimizer, train_loader):
 		optimizer.step()
 
 
-def eval(model, data_loader, check_mem=False, plot_flat=True, epoch_i=0, mode='train'):
+def eval(model, data_loader, check_mem=False, plot_flag=True, epoch_i=0, mode='train'):
 
 	model.eval()
 
@@ -103,7 +103,7 @@ def eval(model, data_loader, check_mem=False, plot_flat=True, epoch_i=0, mode='t
 			prev_mem = cur_mem
 			print("added mem: %sM"%(add_mem))
 
-		if plot_flat and batch_idx == 0:
+		if plot_flag and batch_idx == 0:
 			visualize = decoded[:num_plot].squeeze().unsqueeze(1).repeat(1,3,1)
 			visualize = visualize.view(num_plot,-1,28,28)
 			visualize_kernel(visualize, im_name='epoch{}_{}.jpg'.format(epoch_i, mode),
